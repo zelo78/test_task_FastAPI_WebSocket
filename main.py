@@ -79,11 +79,9 @@ async def root(db: Session = Depends(get_db)):
                 </text-area>
                 <hr>
                 <p>Вводите то, что Вы видите во сне, по одной мысли за раз, и нажимайте кнопку "Я увидел!"</p>  
-                <form action='#'>
-                    <input id="sleep-log-input" type="text" size="100"><br>
-                    <input id="sleep-log-submit" type="button" value="Я увидел!">
-                </form>
-                
+                <input id="sleep-log-input" type="text" size="100"><br>
+                <input id="sleep-log-submit" type="button" value="Я увидел!">
+                                
                 <script>
                 {script}
                 </script>
