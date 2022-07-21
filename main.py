@@ -31,42 +31,39 @@ async def root(db: Session = Depends(get_db)):
 
     script = r"""
             const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/add_thing/');
+            
+            const sleepLogInput = document.querySelector('#sleep-log-input')
+            const sleepLog = document.querySelector('#sleep-log')
+            const sleepLogSubmit = document.querySelector('#sleep-log-submit')
 
             chatSocket.onmessage = function(e) {
                 const data = JSON.parse(e.data);
-                /* document.querySelector('#chat-log').value += (data.message + '\n'); */
-                /* document.querySelector('#chat-log').innerHTML += (data.message + '<br>'); */
-                document.querySelector('#sleep-log').innerHTML += ('#' + data.number + ' ' + data.thing + '<br>');
-                for (const i in data.results) {
-                    document.querySelector('#sleep-log').innerHTML +=
-                    '<a href="' + data.results[i][1] + '">' +
-                    data.results[i][0] + '</a><br>';
-                }
-                /* document.querySelector('#chat-log').rows += 1; */
+                sleepLog.innerHTML += ('#' + data.number + ' ' + data.thing + '<br>');
             };
 
             chatSocket.onclose = function(e) {
                 console.error('Chat socket closed unexpectedly');
             };
 
-            document.querySelector('#sleep-log-input').focus();
-
-            document.querySelector('#sleep-log-input').onkeyup = function(e) {
-                if (e.keyCode === 13) { // enter, return
-                    document.querySelector('#sleep-log-submit').click();
-                }
-            };
-
-            document.querySelector('#sleep-log-submit').onclick = function(e) {
-                const messageInputDom = document.querySelector('#sleep-log-input');
-                const message = messageInputDom.value;
+            sleepLogInput.focus();
+            
+            function sendMessage(e) {
+                const message = sleepLogInput.value;
                 if (message !== '') {
-                    chatSocket.send(JSON.stringify({
-                        'thing': message
-                    }));
+                    chatSocket.send(
+                        JSON.stringify({'thing': message})
+                    );
                 }
-                messageInputDom.value = '';
+                sleepLogInput.value = '';
             };
+            
+            sleepLogInput.onkeyup = function(e) {
+                if (e.keyCode === 13) { // enter, return
+                    sendMessage();
+                }
+            };
+
+            sleepLogSubmit.onclick = sendMessage;
     """
 
     content = f"""
@@ -82,7 +79,7 @@ async def root(db: Session = Depends(get_db)):
                 </text-area>
                 <hr>
                 <p>Вводите то, что Вы видите во сне, по одной мысли за раз, и нажимайте кнопку "Я увидел!"</p>  
-                <form>
+                <form action='#'>
                     <input id="sleep-log-input" type="text" size="100"><br>
                     <input id="sleep-log-submit" type="button" value="Я увидел!">
                 </form>
