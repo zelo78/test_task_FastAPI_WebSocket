@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <title>Sleep log</title>
+        <link rel="icon" href="{{ url_for('static', path='/templates/sleep.ico') }}" type="image/vnd.microsoft.icon">
+    </head>
+    <body>
+        <h1>Сон номер {{ sleep_id }}</h1>
+        <h2>Всё, что Вы увидели в этом сне</h2>
+        <text-area readonly id="sleep-log">
+        </text-area>
+        <hr>
+        <p>Вводите то, что Вы видите во сне, по одной мысли за раз, и нажимайте кнопку "Я увидел!"</p>
+        <input id="sleep-log-input" type="text" size="100"><br>
+        <input id="sleep-log-submit" type="button" value="Я увидел!">
+
+        <script src="{{ url_for('static', path='/templates/main.js') }}"></script>
+    </body>
+</html>
