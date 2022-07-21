@@ -1,5 +1,7 @@
-from fastapi import Depends, FastAPI, HTTPException, WebSocket, Cookie
+from fastapi import Depends, FastAPI, WebSocket, Cookie, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 import models
@@ -8,8 +10,9 @@ from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
-
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="static/templates")
 
 
 # Dependency
@@ -21,75 +24,19 @@ def get_db():
         db.close()
 
 
-@app.get("/")
-async def root(db: Session = Depends(get_db)):
-    db_sleep = models.Sleep()
-    db.add(db_sleep)
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request, db: Session = Depends(get_db)):
+    # new sleep begins
+    sleep = models.Sleep()
+    db.add(sleep)
     db.commit()
-    db.refresh(db_sleep)
-    sleep_id = db_sleep.id
+    db.refresh(sleep)
 
-    script = r"""
-            const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/add_thing/');
-            
-            const sleepLogInput = document.querySelector('#sleep-log-input')
-            const sleepLog = document.querySelector('#sleep-log')
-            const sleepLogSubmit = document.querySelector('#sleep-log-submit')
-
-            chatSocket.onmessage = function(e) {
-                const data = JSON.parse(e.data);
-                sleepLog.innerHTML += ('#' + data.number + ' ' + data.thing + '<br>');
-            };
-
-            chatSocket.onclose = function(e) {
-                console.error('Chat socket closed unexpectedly');
-            };
-
-            sleepLogInput.focus();
-            
-            function sendMessage(e) {
-                const message = sleepLogInput.value;
-                if (message !== '') {
-                    chatSocket.send(
-                        JSON.stringify({'thing': message})
-                    );
-                }
-                sleepLogInput.value = '';
-            };
-            
-            sleepLogInput.onkeyup = function(e) {
-                if (e.keyCode === 13) { // enter, return
-                    sendMessage();
-                }
-            };
-
-            sleepLogSubmit.onclick = sendMessage;
-    """
-
-    content = f"""
-    <!DOCTYPE html>
-        <html lang="ru">
-            <head>
-                <title>Sleep log</title>
-            </head>
-            <body>
-                <h1>Сон номер {sleep_id}</h1>
-                <h2>Всё, что Вы увидели в этом сне</h2>
-                <text-area readonly id="sleep-log">
-                </text-area>
-                <hr>
-                <p>Вводите то, что Вы видите во сне, по одной мысли за раз, и нажимайте кнопку "Я увидел!"</p>  
-                <input id="sleep-log-input" type="text" size="100"><br>
-                <input id="sleep-log-submit" type="button" value="Я увидел!">
-                                
-                <script>
-                {script}
-                </script>
-            </body>
-        </html>
-        """
-    response = HTMLResponse(content=content)
-    response.set_cookie(key="sleep_id", value=str(sleep_id))
+    response = templates.TemplateResponse(
+        name="main.html",
+        context={"request": request, "sleep_id": sleep.id},
+    )
+    response.set_cookie(key="sleep_id", value=str(sleep.id))
     return response
 
 

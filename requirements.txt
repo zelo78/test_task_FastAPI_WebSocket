@@ -1,4 +1,5 @@
 fastapi[all]
 sqlalchemy
 sqlalchemy_utils
+jinja2
 black
