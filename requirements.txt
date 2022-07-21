@@ -1,1 +1,4 @@
 fastapi[all]
+sqlalchemy
+sqlalchemy_utils
+black
