@@ -29,15 +29,17 @@ git clone https://github.com/zelo78/test_task_FastAPI_WebSocket.git .
 ```shell
 python3.10 -m venv venv
 source ./venv/bin/activate
-pip install -Ur requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Запуск
 
 Запустить сервер
 ```shell
-uvicorn main:app
+uvicorn src.main:app
 ```
+
+Или запустить `start.sh`
 
 ### Реализованные URL
 
@@ -48,4 +50,4 @@ uvicorn main:app
 - [x] GET /sleeps/
 - [x] GET /things/
 
-Получение списков снов и предметов во снах (новый сон начинается автоматически при перезагрузке основной страницы, новый предмет сохраняется в БД при нажатии на кнопку "Я увидел!" 
+Получение списков снов и предметов во снах (новый сон начинается автоматически при перезагрузке основной страницы, новый предмет сохраняется в БД при нажатии на кнопку "Я увидел!") 
